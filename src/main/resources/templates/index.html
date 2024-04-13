@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in</title>
+    <link rel="stylesheet" href="/style/index.css">
+</head>
+<body>
+    <div class="container">
+        <div class="welcome_text">
+            <p class="text_left">
+                Welcome To
+            </p>
+            <p class="text_right">
+                Live Chat
+            </p>
+        </div>
+        <div class="form_wrapper">
+            <form action="" method="post" class="form">
+                <p class="text">Phone</p>
+                <input type="tel" name="phone" class="input" autocomplete="off" required>
+                <p class="text">Password</p>
+                <div class="password">
+                    <input type="password" name="password" class="input last" autocomplete="off" required>
+                    <div class="img_container"></div>
+                </div>
+                <p class="text warning" th:text="${warning}"></p>
+                <a href="/registration" class="registration_link text">Create an account</a>
+                <input type="submit" class="input submit" value="Join">
+            </form>
+        </div>
+    </div>
+    <script src="js/index.js"></script>
+</body>
+</html>
