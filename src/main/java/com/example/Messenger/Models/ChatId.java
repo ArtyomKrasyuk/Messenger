@@ -4,9 +4,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
-
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "chat_id")
 public class ChatId {
@@ -18,32 +25,6 @@ public class ChatId {
 
     public ChatId(UUID chatid, UUID userid) {
         this.chatid = chatid;
-        this.userid = userid;
-    }
-
-    public ChatId(){}
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public UUID getChatid() {
-        return chatid;
-    }
-
-    public void setChatid(UUID chatid) {
-        this.chatid = chatid;
-    }
-
-    public UUID getUserid() {
-        return userid;
-    }
-
-    public void setUserid(UUID userid) {
         this.userid = userid;
     }
 }

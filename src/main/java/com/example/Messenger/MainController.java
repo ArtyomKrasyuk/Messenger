@@ -1,5 +1,7 @@
 package com.example.Messenger;
 
+import com.example.Messenger.Dto.Chat;
+import com.example.Messenger.Dto.ChatMessage;
 import com.example.Messenger.Models.ChatId;
 import com.example.Messenger.Models.Message;
 import com.example.Messenger.Models.User;
@@ -85,6 +87,7 @@ public class MainController {
             }
             else{
                 UUID userid = UUID.randomUUID();
+                while(userRepository.existsByUserid(userid)) userid = UUID.randomUUID();
                 User newUser = new User(userid, phone, username, password1);
                 userRepository.save(newUser);
                 request.getSession().setAttribute("userid", userid);
@@ -120,6 +123,7 @@ public class MainController {
         User user = userRepository.findByPhone(phone);
         if(user != null){
             UUID chatid = UUID.randomUUID();
+            while(chatIdRepository.existsByChatid(chatid)) chatid = UUID.randomUUID();
             ChatId firstRecord = new ChatId(chatid, (UUID)request.getSession().getAttribute("userid"));
             String username = userRepository.findByUserid((UUID)request.getSession().getAttribute("userid")).getUsername();
             ChatId secondRecord = new ChatId(chatid, user.getUserid());

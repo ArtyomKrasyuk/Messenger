@@ -4,9 +4,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "message_list")
 public class Message {
@@ -22,48 +30,6 @@ public class Message {
         this.chatid = chatid;
         this.userid = userid;
         this.message = message;
-        this.date = date;
-    }
-
-    public Message(){}
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public UUID getChatid() {
-        return chatid;
-    }
-
-    public void setChatid(UUID chatid) {
-        this.chatid = chatid;
-    }
-
-    public UUID getUserid() {
-        return userid;
-    }
-
-    public void setUserid(UUID userid) {
-        this.userid = userid;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
         this.date = date;
     }
 }

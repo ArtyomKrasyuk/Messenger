@@ -8,4 +8,5 @@ import java.util.UUID;
 public interface ChatIdRepository extends CrudRepository<ChatId, UUID> {
     Iterable<ChatId> findByUserid(UUID userid);
     Iterable<ChatId> findByChatid(UUID chatid);
+    boolean existsByChatid(UUID chatid);
 }

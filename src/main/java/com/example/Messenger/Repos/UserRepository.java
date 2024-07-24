@@ -9,4 +9,5 @@ public interface UserRepository extends CrudRepository<User, UUID> {
     User findByPhoneAndPassword(String phone, String password);
     User findByPhone(String phone);
     User findByUserid(UUID userid);
+    boolean existsByUserid(UUID userid);
 }
