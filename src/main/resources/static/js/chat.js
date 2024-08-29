@@ -63,7 +63,6 @@ function onClick(e){
     activeChat = element;
 }
 
-
 let response = await fetch('/userid');
 if(response.ok) Storage.userid = await response.text();
 
@@ -83,7 +82,16 @@ document.querySelector('#input').onkeyup = function(e){
     }
 };
 
-document.querySelector('.submit').onclick = function(e){
+document.querySelector('.submit').onclick = async function(e){
+    let response =  await fetch('/check');
+    let data = null;
+    if(response.ok) data = await response.json();
+    else data = false;
+    console.log(data);
+    if(!data){
+        document.querySelector('.exit').click();
+        return;
+    }
     const message = document.querySelector('#input').value;
     let now = new Date();
     let hours = String(now.getUTCHours());
