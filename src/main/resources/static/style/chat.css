@@ -51,7 +51,7 @@
 .exit{
     width: 32px;
     height: 32px;
-    background: url('../images/exit.png') no-repeat center top;
+    background: url('/static/images/exit.png') no-repeat center top;
     background-size: cover;
 }
 
@@ -62,7 +62,7 @@
 .search {
     width: 32px;
     height: 32px;
-    background: url('../images/search_icon.png') no-repeat center top;
+    background: url('/static/images/search_icon.png') no-repeat center top;
     background-size: cover;
 }
 

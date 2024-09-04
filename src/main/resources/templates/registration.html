@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration</title>
-    <link rel="stylesheet" href="/style/registration.css">
+    <link rel="stylesheet" href="/static/style/registration.css">
 </head>
 <body>
     <div class="container">
@@ -17,27 +17,27 @@
             </p>
         </div>
         <div class="form_wrapper">
-            <form action="" method="post" class="form">
+            <div class="form">
                 <p class="text">Name</p>
-                <input type="text" name="username" class="input" autocomplete="off" required>
+                <input type="text" name="username" class="input" id="username" autocomplete="off" required>
                 <p class="text">Phone</p>
-                <input type="tel" name="phone" class="input" autocomplete="off" required>
+                <input type="tel" name="phone" class="input" id="tel" autocomplete="off" required>
                 <p class="text">Password</p>
                 <div class="password">
-                    <input type="password" name="password1" class="input password_field1" autocomplete="off" required>
+                    <input type="password" name="password1" id="password1" class="input password_field1" autocomplete="off" required>
                     <div class="img_container first"></div>
                 </div>
                 <p class="text">Repeat Password</p>
                 <div class="password">
-                    <input type="password" name="password2" class="input password_field2" autocomplete="off" required>
+                    <input type="password" name="password2" id="password2" class="input password_field2" autocomplete="off" required>
                     <div class="img_container second"></div>
                 </div>
-                <p class="text warning" th:text="${warning}"></p>
+                <p class="text warning"></p>
                 <a href="/" class="login_link text">Log in</a>
-                <input type="submit" class="input submit" value="Join">
-            </form>
+                <button class="submit">Join</button>
+            </div>
         </div>
     </div>
-    <script src="js/registration.js"></script>
+    <script src="/static/js/registration.js"></script>
 </body>
 </html>

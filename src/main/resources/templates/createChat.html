@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log in</title>
-    <link rel="stylesheet" href="/style/createChat.css">
+    <link rel="stylesheet" href="/static/style/createChat.css">
 </head>
 <body>
     <div class="container">
@@ -14,14 +14,15 @@
             </p>
         </div>
         <div class="form_wrapper">
-            <form action="" method="post" class="form">
+            <div class="form">
                 <p class="text">User`s phone number</p>
-                <input type="tel" name="phone" class="input" autocomplete="off" required>
-                <p class="text warning" th:text="${warning}"></p>
+                <input type="tel" name="phone" class="input" autocomplete="off" id="tel" required>
+                <p class="text warning"></p>
                 <a href="/chat" class="chat_link text">Back to the chats</a>
-                <input type="submit" class="input submit" value="Create chat">
-            </form>
+                <button class="submit" >Create chat</button>
+            </div>
         </div>
     </div>
+    <script src="/static/js/createChat.js" type="module"></script>
 </body>
 </html>

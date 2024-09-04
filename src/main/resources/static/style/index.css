@@ -106,16 +106,20 @@
     padding-left: 0px;
 }
 
+.submit:hover{
+    cursor: pointer;
+}
+
 .img_container{
     width: 39px;
     height: 39px;
-    background: url('/images/Aniket-Suvarna-Box-Regular-Bx-show-alt.48.png') no-repeat center top;
+    background: url('/static/images/Aniket-Suvarna-Box-Regular-Bx-show-alt.48.png') no-repeat center top;
     background-size: cover;
     margin-left: 5px;
 }
 
 .view{
-    background: url('/images/Aniket-Suvarna-Box-Regular-Bx-hide.48.png') no-repeat center top;
+    background: url('/static/images/Aniket-Suvarna-Box-Regular-Bx-hide.48.png') no-repeat center top;
     background-size: cover;
 }
 

@@ -1,7 +1,6 @@
 package com.example.Messenger;
 
-import com.example.Messenger.Dto.Chat;
-import com.example.Messenger.Dto.ChatMessage;
+import com.example.Messenger.Dto.*;
 import com.example.Messenger.Models.ChatId;
 import com.example.Messenger.Models.Message;
 import com.example.Messenger.Models.Session;
@@ -16,16 +15,13 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
 @Controller
+@CrossOrigin(origins = "http://192.168.0.103", allowCredentials = "true")
 public class MainController {
 
     @Autowired
@@ -49,89 +45,43 @@ public class MainController {
         }
     }
 
-    @GetMapping("/")
-    public String index(Model model, HttpServletRequest request){
-        model.addAttribute("warning", "");
-        if(request.getSession(false) != null && sessionRepository.existsById(request.getSession().getId())) return "redirect:/chat";
-        return "index";
-    }
-
     @PostMapping("/")
-    public String login(@RequestParam String phone, @RequestParam String password, Model model, HttpServletRequest request){
-        if(request.getSession(false) != null && sessionRepository.existsById(request.getSession().getId())) return "redirect:/chat";
-        User user = userRepository.findByPhoneAndPassword(phone, password);
+    @ResponseBody
+    public String login(@RequestBody LogIn logIn, HttpServletRequest request){
+        if(request.getSession(false) != null && sessionRepository.existsById(request.getSession().getId())) return "ok";
+        User user = userRepository.findByPhoneAndPassword(logIn.getPhone(), logIn.getPassword());
         if(user != null){
             sessionRepository.save(new Session(request.getSession().getId(), user.getUserid()));
-            return "redirect:/chat";
+            return "ok";
         }
-        else{
-            model.addAttribute("warning", "Invalid username or password");
-            return "index";
-        }
-    }
-
-    @GetMapping("/registration")
-    public String registrationTemplate(Model model, HttpServletRequest request){
-        if(request.getSession(false) != null && sessionRepository.existsById(request.getSession().getId())) return "redirect:/chat";
-        model.addAttribute("warning", "");
-        return "registration";
+        else return "Invalid username or password";
     }
 
     @PostMapping("/registration")
-    public String registration(
-            @RequestParam String username,
-            @RequestParam String phone,
-            @RequestParam String password1,
-            @RequestParam String password2,
-            Model model,
-            HttpServletRequest request)
-    {
-        if(request.getSession(false) != null && sessionRepository.existsById(request.getSession().getId())) return "redirect:/chat";
-        if(password1.equals(password2)){
-            User user = userRepository.findByPhone(phone);
-            if(user != null){
-               model.addAttribute("warning", "This phone number already taken");
-               return "registration";
-            }
-            else{
-                UUID userid = UUID.randomUUID();
-                while(userRepository.existsByUserid(userid)) userid = UUID.randomUUID();
-                User newUser = new User(userid, phone, username, password1);
-                userRepository.save(newUser);
-                sessionRepository.save(new Session(request.getSession().getId(), userid));
-                return "redirect:/chat";
-            }
+    @ResponseBody
+    public String registration(@RequestBody Registration reg, HttpServletRequest request) {
+        if(request.getSession(false) != null && sessionRepository.existsById(request.getSession().getId())) return "ok";
+        User user = userRepository.findByPhone(reg.getPhone());
+        if(user != null){
+            return "This phone number already taken";
         }
         else{
-            model.addAttribute("warning", "Password mismatch");
-            return "registration";
+            UUID userid = UUID.randomUUID();
+            while(userRepository.existsByUserid(userid)) userid = UUID.randomUUID();
+            User newUser = new User(userid, reg.getPhone(), reg.getUsername(), reg.getPassword1());
+            userRepository.save(newUser);
+            sessionRepository.save(new Session(request.getSession().getId(), userid));
+            return "ok";
         }
-    }
-
-    @GetMapping("/chat")
-    public String chat(Model model, HttpServletRequest request){
-        if(sessionRepository.existsById(request.getSession().getId())){
-            model.addAttribute("warning", "");
-            return "chat";
-        }
-        else return "redirect:";
-    }
-
-    @GetMapping("/create_chat")
-    public String createChatTemplate(Model model, HttpServletRequest request){
-        if(sessionRepository.existsById(request.getSession().getId())){
-            model.addAttribute("warning", "");
-            return "createChat";
-        }
-        else return "redirect:";
     }
 
     @PostMapping("/create_chat")
-    public String createChat(@RequestParam String phone, Model model, HttpServletRequest request){
-        User user = userRepository.findByPhone(phone);
-        if(user != null && request.getSession(false) != null){
+    @ResponseBody
+    public String createChat(@RequestBody CreateChat phone, HttpServletRequest request){
+        if(request.getSession(false) == null || !sessionRepository.existsById(request.getSession().getId())) return "redirect";
+        User user = userRepository.findByPhone(phone.getPhone());
+        if(user != null){
             UUID chatid = UUID.randomUUID();
-            if(!sessionRepository.existsById(request.getSession().getId())) return "redirect:";
             UUID userid = sessionRepository.findById(request.getSession().getId()).get().getUserId();
             while(chatIdRepository.existsByChatid(chatid)) chatid = UUID.randomUUID();
             ChatId firstRecord = new ChatId(chatid, userid);
@@ -140,12 +90,9 @@ public class MainController {
             chatIdRepository.save(firstRecord);
             chatIdRepository.save(secondRecord);
             template.convertAndSend("/messenger/" + user.getUserid().toString(), new Chat(username, chatid.toString(), "chat"));
-            return "redirect:/chat";
+            return "ok";
         }
-        else{
-            model.addAttribute("warning", "Wrong phone number");
-            return "createChat";
-        }
+        else return "Wrong phone number";
     }
 
     @GetMapping("/userid")
@@ -158,6 +105,7 @@ public class MainController {
     @ResponseBody
     public ArrayList<Chat> getChats(HttpServletRequest request){
         ArrayList<Chat> chats = new ArrayList<>();
+        if(request.getSession(false) == null || !sessionRepository.existsById(request.getSession().getId())) return chats;
         UUID userid = sessionRepository.findById(request.getSession().getId()).get().getUserId();
         Iterable<ChatId> chatswithuser = chatIdRepository.findByUserid(userid);
         for(ChatId chat : chatswithuser){
@@ -191,11 +139,12 @@ public class MainController {
     }
 
     @GetMapping("/exit")
-    public String exit(HttpServletRequest request){
+    @ResponseBody
+    public String  exit(HttpServletRequest request){
         String id = request.getSession().getId();
         if(sessionRepository.existsById(id)) sessionRepository.deleteById(id);
         request.getSession().invalidate();
-        return "redirect:";
+        return "ok";
     }
 
     @GetMapping("/check")

@@ -53,7 +53,7 @@ function onClick(e){
     }
     document.querySelector('.messages').innerHTML = '';
     let chatid = e.currentTarget.children[1].textContent;
-    fetch(`/get_messages?chatid=${chatid}`).then(response => response.json()).then(messages => {
+    fetch(`http://127.0.0.1:8080/get_messages?chatid=${chatid}`, {credentials: 'include'}).then(response => response.json()).then(messages => {
         for(let elem of messages){
             appendMessage(elem);
         }
@@ -63,10 +63,19 @@ function onClick(e){
     activeChat = element;
 }
 
-let response = await fetch('/userid');
+async function check(){
+    let response = await fetch('http://127.0.0.1:8080/check', {credentials: 'include'});
+    let check = false;
+    if(response.ok) check = await response.json();
+    if(!check) window.location.href = '/';
+}
+
+check();
+
+let response = await fetch('http://127.0.0.1:8080/userid', {credentials: 'include'});
 if(response.ok) Storage.userid = await response.text();
 
-let chatsResponse = await fetch('/get_chats');
+let chatsResponse = await fetch('http://127.0.0.1:8080/get_chats', {credentials: 'include'});
 let chats = null;
 if(chatsResponse.ok) chats = await chatsResponse.json();
 for(let chat of chats){
@@ -83,11 +92,10 @@ document.querySelector('#input').onkeyup = function(e){
 };
 
 document.querySelector('.submit').onclick = async function(e){
-    let response =  await fetch('/check');
+    let response =  await fetch('http://127.0.0.1:8080/check', {credentials: 'include'});
     let data = null;
     if(response.ok) data = await response.json();
     else data = false;
-    console.log(data);
     if(!data){
         document.querySelector('.exit').click();
         return;
@@ -111,12 +119,16 @@ document.querySelector('.submit').onclick = async function(e){
         month = '0' + month;
     }
     let date = `${hours}:${minutes} ${day}.${month}.${now.getUTCFullYear()}`;
-    stompClient.send('/app/message', {}, JSON.stringify({
+    stompClient.publish({destination: '/app/message', body: JSON.stringify({
         'userid': Storage.userid, 
         'chatid': activeChat.children[1].textContent,
         'content': message,
         'date': date,
         'type': 'message'
-    }));
+    })});
     document.querySelector('#input').value = '';
 };
+
+document.querySelector('.exit').onclick = function(e){
+    fetch('http://127.0.0.1:8080/exit', {credentials: 'include'}).then(response => {if(response.ok) window.location.href = '/';});
+}
