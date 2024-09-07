@@ -1,12 +1,13 @@
 package com.example.Messenger;
 
-import com.example.Messenger.Dto.Chat;
-import com.example.Messenger.Dto.ChatMessage;
+import com.example.Messenger.Dto.*;
 import com.example.Messenger.Models.ChatId;
 import com.example.Messenger.Models.Message;
+import com.example.Messenger.Models.Session;
 import com.example.Messenger.Models.User;
 import com.example.Messenger.Repos.ChatIdRepository;
 import com.example.Messenger.Repos.MessageRepository;
+import com.example.Messenger.Repos.SessionRepository;
 import com.example.Messenger.Repos.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,16 +15,13 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.UUID;
 
 @Controller
+@CrossOrigin(origins = "http://192.168.0.103", allowCredentials = "true")
 public class MainController {
 
     @Autowired
@@ -32,6 +30,8 @@ public class MainController {
     private ChatIdRepository chatIdRepository;
     @Autowired
     private MessageRepository messageRepository;
+    @Autowired
+    private SessionRepository sessionRepository;
     @Autowired
     private SimpMessagingTemplate template;
 
@@ -45,111 +45,68 @@ public class MainController {
         }
     }
 
-    @GetMapping("/")
-    public String index(Model model){
-        model.addAttribute("warning", "");
-        return "index";
-    }
-
     @PostMapping("/")
-    public String login(@RequestParam String phone, @RequestParam String password, Model model, HttpServletRequest request){
-        User user = userRepository.findByPhoneAndPassword(phone, password);
+    @ResponseBody
+    public String login(@RequestBody LogIn logIn, HttpServletRequest request){
+        if(request.getSession(false) != null && sessionRepository.existsById(request.getSession().getId())) return "ok";
+        User user = userRepository.findByPhoneAndPassword(logIn.getPhone(), logIn.getPassword());
         if(user != null){
-            request.getSession().setAttribute("userid", user.getUserid());
-            return "redirect:/chat";
+            sessionRepository.save(new Session(request.getSession().getId(), user.getUserid()));
+            return "ok";
         }
-        else{
-            model.addAttribute("warning", "Invalid username or password");
-            return "index";
-        }
-    }
-
-    @GetMapping("/registration")
-    public String registrationTemplate(Model model){
-        model.addAttribute("warning", "");
-        return "registration";
+        else return "Invalid username or password";
     }
 
     @PostMapping("/registration")
-    public String registration(
-            @RequestParam String username,
-            @RequestParam String phone,
-            @RequestParam String password1,
-            @RequestParam String password2,
-            Model model,
-            HttpServletRequest request)
-    {
-        if(password1.equals(password2)){
-            User user = userRepository.findByPhone(phone);
-            if(user != null){
-               model.addAttribute("warning", "This phone number already taken");
-               return "registration";
-            }
-            else{
-                UUID userid = UUID.randomUUID();
-                while(userRepository.existsByUserid(userid)) userid = UUID.randomUUID();
-                User newUser = new User(userid, phone, username, password1);
-                userRepository.save(newUser);
-                request.getSession().setAttribute("userid", userid);
-                return "redirect:/chat";
-            }
+    @ResponseBody
+    public String registration(@RequestBody Registration reg, HttpServletRequest request) {
+        if(request.getSession(false) != null && sessionRepository.existsById(request.getSession().getId())) return "ok";
+        User user = userRepository.findByPhone(reg.getPhone());
+        if(user != null){
+            return "This phone number already taken";
         }
         else{
-            model.addAttribute("warning", "Password mismatch");
-            return "registration";
+            UUID userid = UUID.randomUUID();
+            while(userRepository.existsByUserid(userid)) userid = UUID.randomUUID();
+            User newUser = new User(userid, reg.getPhone(), reg.getUsername(), reg.getPassword1());
+            userRepository.save(newUser);
+            sessionRepository.save(new Session(request.getSession().getId(), userid));
+            return "ok";
         }
-    }
-
-    @GetMapping("/chat")
-    public String chat(Model model, HttpServletRequest request){
-        if(request.getSession().getAttribute("userid") != null){
-            model.addAttribute("warning", "");
-            return "chat";
-        }
-        else return "redirect:";
-    }
-
-    @GetMapping("/create_chat")
-    public String createChatTemplate(Model model, HttpServletRequest request){
-        if(request.getSession().getAttribute("userid") != null){
-            model.addAttribute("warning", "");
-            return "createChat";
-        }
-        else return "redirect:";
     }
 
     @PostMapping("/create_chat")
-    public String createChat(@RequestParam String phone, Model model, HttpServletRequest request){
-        User user = userRepository.findByPhone(phone);
+    @ResponseBody
+    public String createChat(@RequestBody CreateChat phone, HttpServletRequest request){
+        if(request.getSession(false) == null || !sessionRepository.existsById(request.getSession().getId())) return "redirect";
+        User user = userRepository.findByPhone(phone.getPhone());
         if(user != null){
             UUID chatid = UUID.randomUUID();
+            UUID userid = sessionRepository.findById(request.getSession().getId()).get().getUserId();
             while(chatIdRepository.existsByChatid(chatid)) chatid = UUID.randomUUID();
-            ChatId firstRecord = new ChatId(chatid, (UUID)request.getSession().getAttribute("userid"));
-            String username = userRepository.findByUserid((UUID)request.getSession().getAttribute("userid")).getUsername();
+            ChatId firstRecord = new ChatId(chatid, userid);
+            String username = userRepository.findByUserid(userid).getUsername();
             ChatId secondRecord = new ChatId(chatid, user.getUserid());
             chatIdRepository.save(firstRecord);
             chatIdRepository.save(secondRecord);
             template.convertAndSend("/messenger/" + user.getUserid().toString(), new Chat(username, chatid.toString(), "chat"));
-            return "redirect:/chat";
+            return "ok";
         }
-        else{
-            model.addAttribute("warning", "Wrong phone number");
-            return "createChat";
-        }
+        else return "Wrong phone number";
     }
 
     @GetMapping("/userid")
     @ResponseBody
     public String getUserid(HttpServletRequest request){
-        UUID userid = (UUID)request.getSession().getAttribute("userid");
-        return userid.toString();
+        return sessionRepository.existsById(request.getSession().getId()) ? sessionRepository.findById(request.getSession().getId()).get().getUserId().toString() : null;
     }
 
     @GetMapping("/get_chats")
     @ResponseBody
     public ArrayList<Chat> getChats(HttpServletRequest request){
         ArrayList<Chat> chats = new ArrayList<>();
-        UUID userid = (UUID)request.getSession().getAttribute("userid");
+        if(request.getSession(false) == null || !sessionRepository.existsById(request.getSession().getId())) return chats;
+        UUID userid = sessionRepository.findById(request.getSession().getId()).get().getUserId();
         Iterable<ChatId> chatswithuser = chatIdRepository.findByUserid(userid);
         for(ChatId chat : chatswithuser){
             Iterable<ChatId> chatswithchatid = chatIdRepository.findByChatid(chat.getChatid());
@@ -179,5 +136,20 @@ public class MainController {
             messages.add(message);
         }
         return messages;
+    }
+
+    @GetMapping("/exit")
+    @ResponseBody
+    public String  exit(HttpServletRequest request){
+        String id = request.getSession().getId();
+        if(sessionRepository.existsById(id)) sessionRepository.deleteById(id);
+        request.getSession().invalidate();
+        return "ok";
+    }
+
+    @GetMapping("/check")
+    @ResponseBody
+    public boolean checkSession(HttpServletRequest request){
+        return request.getSession(false) != null && sessionRepository.existsById(request.getSession().getId());
     }
 }

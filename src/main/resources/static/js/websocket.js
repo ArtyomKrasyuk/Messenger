@@ -5,14 +5,17 @@ import { appendMessage } from "./chat.js";
 export let stompClient = null;
 
 export function connect(){
-    let socket = new SockJS('/ws');
-    stompClient = Stomp.over(socket);
-    stompClient.connect({}, onConnected, onError);
+    stompClient = new StompJs.Client({
+        brokerURL: 'ws://127.0.0.1:8080/ws'
+    });
+    stompClient.onConnect = frame => {stompClient.subscribe(`/messenger/${Storage.userid}`, onMessage);}
+    stompClient.onStompError = onError;
+    stompClient.activate();
 }
 
-function onConnected(){
+/*function onConnected(){
     stompClient.subscribe(`/messenger/${Storage.userid}`, onMessage);
-}
+}*/
 
 function onMessage(mes){
     let body = JSON.parse(mes.body);
