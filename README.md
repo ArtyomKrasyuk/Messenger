@@ -141,7 +141,7 @@ COPY /target/Messenger-0.0.1-SNAPSHOT.jar /app/messenger.jar
 ENTRYPOINT ["java", "-jar", "messenger.jar"]
 ```
 
-#Nginx
+# Nginx
 
 Конфигурация:
 ```nginx
