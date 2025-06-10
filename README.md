@@ -11,7 +11,7 @@
 # Технологии
 - Java
 - Spring Boot
-- Spring Data
+- Spring Data JPA
 - PostgreSQL
 - Redis
 - Docker
