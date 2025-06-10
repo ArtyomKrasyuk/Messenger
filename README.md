@@ -11,6 +11,7 @@
 # Технологии
 - Java
 - Spring Boot
+- Spring Web
 - Spring Data JPA
 - PostgreSQL
 - Redis
