@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live chat</title>
+    <link rel="stylesheet" href="/static/style/chat.css">
+</head>
+<body>
+<div class="content">
+    <div class="chatlist_wrapper">
+        <div class="logo">
+            <div class="exit"></div>
+            <p class="logo_text">Live Chat</p>
+            <a href="/create_chat" class="search"></a>
+        </div>
+        <div class="chats">
+        </div>
+    </div>
+    <div class="start_message">
+        <p class="start_message__text">
+            Select a chat to start messaging
+        </p>
+    </div>
+    <div class="chat_wrapper" style="display: none;">
+        <div class="messages">
+        </div>
+        <div class="input_bar">
+            <textarea name="message" class="input" id="input" placeholder="Some text..." autocomplete="off"></textarea>
+            <input type="submit" class="submit" value="Send">
+        </div>
+    </div>
+</div>
+<!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@5.0.0/bundles/stomp.umd.js"></script>
+    <script src="/static/js/chat.js" type="module"></script>
+</body>
+</html>
